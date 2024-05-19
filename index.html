@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="js/constant.js"></script>
+    <script src="js/card.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/queue.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/gameUI.js"></script>
+    <script src="js/game.js"></script>
+</head>
+
+<body>
+    <canvas id="cardCanvas" width="1200" height="796"></canvas>
+    <script>
+        var canvas = document.getElementById("cardCanvas");
+        var ctx = canvas.getContext('2d');
+        var game = new Game(canvas, ctx);
+        game.initGame();
+    </script>
+</body>
+
+</html>
