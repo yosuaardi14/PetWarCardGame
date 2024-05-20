@@ -15,7 +15,7 @@ class Game {
         this.rangerList = Array.from(CANVAS_RANGER);
         this.playerArr = [];
         this.playerNum = 2;
-        this.maxLife = 5;
+        this.maxLife = 1;//5;
         this.nowTurn = 0;
         this.turn = 0;
         this.round = 0;
@@ -43,7 +43,7 @@ class Game {
             delete actionCard.cardNum;
         }
         shuffle(this.actionDeck);
-        console.log(this.actionDeck);
+        // console.log(this.actionDeck);
     }
 
 
@@ -81,7 +81,7 @@ class Game {
         this.petLine = this.petDeck.getSome(6);
         // this.petDeck.printElement(6);
         // this.petDeck.printAll();
-
+        this.gameUI.drawPlayerLife(this.playerArr);
         this.gameUI.drawActionUp(this.actionUp, this.actionDeck);
         this.gameUI.drawPetLine(this.petLine, this.petDeck);
         this.gameUI.drawActionDown(this.actionDown, this.discardPile);
@@ -125,7 +125,7 @@ class Game {
         this.initPetDeck();
         this.showPetLine();
         this.getFirstTurn();
-        // this.startGame();
+        this.startGame();
         // console.log(this.playerArr);
         // console.log(this.actionDeck);
         // this.getActionCard(this.playerArr[0]);
@@ -133,30 +133,66 @@ class Game {
     }
 
     showPlayerActionCard(player) {
-        console.log(player.name + "-" + player.rangerName);
-        console.log(player.cardDeck);
-        let res;
-        do {
-            res = prompt("Select Card " + player.cardDeck.length);
-            if (isNaN(res) || res == "") {
-                res = null;
-                continue;
+        this.gameUI.drawPlayerActionCardModal(player);
+        // console.log(player.name + "-" + player.rangerName);
+        // console.log(player.cardDeck);
+        // let res;
+        // do {
+        //     res = prompt("Select Card " + player.cardDeck.length);
+        //     if (isNaN(res) || res == "") {
+        //         res = null;
+        //         continue;
+        //     }
+        //     if (parseInt(res) > player.cardDeck.length) {
+        //         res = null;
+        //         continue;
+        //     }
+        // } while (res === null);
+        // let cardNum = parseInt(res) - 1;
+        // this.useActionCard(player, cardNum);
+    }
+
+    updateGrenadeTurn() {
+        for (let i = 0; i < this.actionDown.length; i++) {
+            if (this.actionDown[i] !== null && this.actionDown[i]["turn"] >= 3) {
+                this.actionDown[i]["turn"] = 0;
+                this.discardPile.push(this.actionDown[i]);
+                this.actionDown[i] = null;
+                if (this.petDeck.get(i)[0]["name"] !== "Jungle") {
+                    // minus the life
+                    let id = this.getRangerByPet(this.petDeck.get(i)[0]["name"]);
+                    this.playerArr[id].life--;
+                    this.petDeck.removeAt(i);
+                    this.showPetLine();
+                }
             }
-            if (parseInt(res) > player.cardDeck.length) {
-                res = null;
-                continue;
+        }
+        for (let i = 0; i < this.actionDown.length; i++) {
+            if (this.actionDown[i] !== null) {
+                this.actionDown[i]["turn"]++;
+                console.log(this.actionDown[i]["turn"]);
             }
-        } while (res === null);
-        let cardNum = parseInt(res) - 1;
-        this.useActionCard(player, cardNum);
+        }
+    }
+
+    getRangerByPet(petName) {
+        console.log(petName);
+        for (var i = 0; i < this.playerArr.length; i++) {
+            console.log(this.playerArr[i].ranger["pet"]);
+            if (this.playerArr[i].ranger["pet"] == petName) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     useActionCard(player, cardNum) {
         var selectedCard = player.cardDeck[cardNum];
-        console.log(selectedCard["name"]);
+        // console.log(selectedCard);
+        // console.log(selectedCard["name"]);
         var cardAbility;
         if (selectedCard["special"] !== null && player.rangerName === selectedCard["special"]["ranger"]) {
-            console.log(selectedCard["special"]["ranger"]);
+            // console.log(selectedCard["special"]["ranger"]);
             var useSpecial = confirm("Do you want to use Special?");
             if (useSpecial == true) {
                 cardAbility = selectedCard["special"]["ability"];
@@ -166,23 +202,58 @@ class Game {
         } else {
             cardAbility = selectedCard["ability"];
         }
-        this.abilityAction(player, cardAbility);
+        this.abilityAction(player, cardAbility, cardNum);
         this.actionFinish(player, cardNum, cardAbility);
         this.updateTurn();
     }
 
-    abilityAction(player, action) {
-        console.log(action);
+    abilityAction(player, action, cardNumn) {
+        // console.log(action);
+        let res;
         switch (action) {
             case "TwoAim":
                 break;
             case "Aim":
+                do {
+                    res = prompt("Select Card " + player.cardDeck.length);
+                    if (isNaN(res) || res == "") {
+                        res = null;
+                        continue;
+                    }
+                    if (parseInt(res) > this.actionUp.length) {
+                        res = null;
+                        continue;
+                    }
+                } while (res === null);
+                this.actionUp[parseInt(res) - 1] = player.cardDeck[cardNumn];
                 break;
             case "TwoBoom":
+                // check there is aim if not discard
                 break;
             case "Boom":
+                // check there is aim if not discard
                 break;
-            case "Doom":
+            case "Doom": // DONE
+                do {
+                    res = prompt("Select Card " + player.cardDeck.length);
+                    if (isNaN(res) || res == "") {
+                        res = null;
+                        continue;
+                    }
+                    if (parseInt(res) > this.petLine.length) {
+                        res = null;
+                        continue;
+                    }
+                } while (res === null);
+                // check if not jungle
+                // console.log(this.petLine[parseInt(res) - 1]);
+                if (this.petDeck.get(parseInt(res) - 1)[0]["name"] !== "Jungle") {
+                    // minus the life
+                    let id = this.getRangerByPet(this.petDeck.get(parseInt(res) - 1)[0]["name"]);
+                    this.playerArr[id].life--;
+                    this.petDeck.removeAt(parseInt(res) - 1);
+                }
+                // this.discardPile.push(player.cardDeck[cardNum]);
                 break;
             case "Miss":
                 break;
@@ -192,7 +263,9 @@ class Game {
                 break;
             case "MoveThePet":
                 break;
-            case "Typhoon":
+            case "Typhoon": // DONE
+                this.petDeck.shuffleAll();
+                this.showPetLine();
                 break;
             case "GetCover":
                 break;
@@ -218,28 +291,63 @@ class Game {
                 break;
 
             case "Grenade":
+                do {
+                    res = prompt("Select Card " + player.cardDeck.length);
+                    if (isNaN(res) || res == "") {
+                        res = null;
+                        continue;
+                    }
+                    if (parseInt(res) > this.actionDown.length) {
+                        res = null;
+                        continue;
+                    }
+                } while (res === null);
+                this.actionDown[parseInt(res) - 1] = player.cardDeck[cardNumn];
                 break;
             case "MegaGrenade":
+                do {
+                    res = prompt("Select Card " + player.cardDeck.length);
+                    if (isNaN(res) || res == "") {
+                        res = null;
+                        continue;
+                    }
+                    if (parseInt(res) > this.actionDown.length) {
+                        res = null;
+                        continue;
+                    }
+                } while (res === null);
+                this.actionDown[parseInt(res) - 1] = player.cardDeck[cardNumn];
                 break;
 
             case "DoubleResurrect":
-                break;
-            case "Ressurect":
-                break;
-
-            case "LunchTime":
-                for (var i = 0; i < this.actionUp.length; i++) {
-                    if (this.actionUp[i] != undefined) {
-                        // this.actionUp.splice(0, 1);
-                        // this.discardPile.push();
+                for (let i = 0; i < 2; i++) {
+                    if (player.life < player.maxLife) {
+                        player.life++;
+                        let revivePet = Object.assign({}, PET[player.ranger["pet"]]);
+                        this.petDeck.add([revivePet]);
                     }
                 }
+                break;
+            case "Ressurect":
+                if (player.life < player.maxLife) {
+                    player.life++;
+                    let revivePet = Object.assign({}, PET[player.ranger["pet"]]);
+                    this.petDeck.add([revivePet]);
+                }
+                break;
+            case "LunchTime": // DONE
+                for (let i = 0; i < this.actionUp.length; i++) {
+                    if (this.actionUp[i] != null) {
+                        this.discardPile.push(this.actionUp[i]);
+                    }
+                }
+                this.actionUp = [null, null, null, null, null, null];
                 break;
             case "Escape":
                 break;
             case "DoubleRun":
                 this.petDeck.moveForwardAll();
-            case "Running":
+            case "Running": // DONE
                 this.petDeck.moveForwardAll();
                 break;
         }
@@ -271,18 +379,20 @@ class Game {
             this.nowTurn = (this.nowTurn + 1) % this.playerArr.length;
         }
         this.turn++;
+        this.updateGrenadeTurn();
         this.startGame();
     }
 
     startGame() {
         this.checkFinish();
-        console.log("Discard Pile");
-        console.log(this.discardPile);
+        // console.log("Discard Pile");
+        // console.log(this.discardPile);
         this.showPlayerActionCard(this.playerArr[this.nowTurn]);
     }
 
     finishGame(winner) {
         console.log(this.playerArr[winner].name + " is Win");
+        this.gameUI.hideActionButton();
     }
 
     checkFinish() {

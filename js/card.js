@@ -28,7 +28,7 @@ class ActionCard {
     }
 
     drawCardDetails() {
-        this.ctx.fillStyle = 'black';
+        this.ctx.fillStyle = this.cardInfo["color"];//'black';
         this.ctx.font = '16px Arial';
         this.ctx.fillText(this.titleUp, this.cardX + 10, this.cardY + 30);
     }
@@ -38,7 +38,7 @@ class ActionCard {
         this.ctx.translate(this.cardX + this.cardWidth / 2, this.cardY + this.cardHeight / 2);
         this.ctx.rotate(Math.PI);
         this.ctx.translate(-this.cardX - this.cardWidth / 2, -this.cardY - this.cardHeight / 2);
-        this.ctx.fillStyle = 'orange';
+        this.ctx.fillStyle = this.cardInfo["special"]["color"];//'orange';
         this.ctx.font = '16px Arial';
         this.ctx.fillText(this.titleDown, this.cardX + 10, this.cardY + 30);
         this.ctx.restore();
@@ -55,20 +55,22 @@ class ActionCard {
     draw() {
         this.drawCardBackground();
         this.drawCardDetails();
-        if (this.cardInfo["special"] != null)
+        if (this.cardInfo["special"] != null) {
             this.drawMirroredDetails();
-        this.drawSeparationLine();
+            this.drawSeparationLine();
+        }
     }
 }
 
 class PetCard {
-    constructor(ctx, cardWidth = 150, cardHeight = 250, x, y, cardInfo) {
+    constructor(ctx, cardWidth = 150, cardHeight = 250, x, y, cardInfo, cardLen) {
         this.ctx = ctx;
         this.cardWidth = cardWidth;
         this.cardHeight = cardHeight;
         this.cardX = x;
         this.cardY = y;
         this.cardInfo = cardInfo;
+        this.cardLen = cardLen;
     }
 
     drawCardBackground() {
@@ -80,9 +82,15 @@ class PetCard {
     }
 
     drawCardDetails() {
-        this.ctx.fillStyle = 'black';
+        this.ctx.fillStyle = this.cardInfo["color"];//'black';
         this.ctx.font = '16px Arial';
         this.ctx.fillText(this.cardInfo["name"], this.cardX + 10, this.cardY + 30);
+
+        const textWidthLen = this.ctx.measureText(this.len).width; // Measure the width of the text
+        const textXLen = this.cardX + (this.cardWidth - textWidthLen) / 2; // Calculate the x-coordinate to center the text 
+        if (this.cardLen > 1) {
+            this.ctx.fillText("Total: " + this.cardLen, textXLen, this.cardY + this.cardHeight - 10);
+        }
     }
 
     drawDescriptionDetails() {
@@ -127,7 +135,7 @@ class RangerCard {
     }
 
     drawCardDetails() {
-        this.ctx.fillStyle = 'black';
+        this.ctx.fillStyle = this.cardInfo["color"];//'black';
         this.ctx.font = '16px Arial';
         this.ctx.fillText(this.cardInfo["name"], this.cardX + 10, this.cardY + 30);
     }
@@ -245,7 +253,7 @@ class PetEmpty {
     }
 
     drawCardBackground() {
-        this.ctx.fillStyle = 'cyan';
+        this.ctx.fillStyle = 'springgreen';
         this.ctx.fillRect(this.cardX, this.cardY, this.cardWidth, this.cardHeight);
         this.ctx.strokeStyle = 'black';
         this.ctx.lineWidth = 2;
@@ -386,7 +394,7 @@ class PetDeck {
     }
 
     drawCardBackground() {
-        this.ctx.fillStyle = 'cyan';
+        this.ctx.fillStyle = 'springgreen';
         this.ctx.fillRect(this.cardX, this.cardY, this.cardWidth, this.cardHeight);
         this.ctx.strokeStyle = 'black';
         this.ctx.lineWidth = 2;
@@ -459,7 +467,7 @@ class BackCard {
         this.text2 = "War";
         this.color = "yellow";
         if (type == "pet") {
-            this.color = "cyan";
+            this.color = "springgreen";
         }
         this.len = "Total: " + len;
     }
